@@ -5,7 +5,8 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "dev": "node --watch main.js"
+    "dev": "node --watch main.js",
+    "con": "node --watch helpers/db/connection.js"
   },
   "keywords": [],
   "author": "",
