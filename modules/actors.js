@@ -118,5 +118,15 @@ export class Actor extends Connection{
         return data
     }
 
+      // 18. **Encontrar todos los actores que han ganado premios despues de 2015:**
+
+      async getActorsWonPrizesAfterYear({year}={year: 2015}) {
+        await this.client.connect()
+        const data = await this.collection.find({"awards.year": {$gt: year}}).project({full_name: true}).toArray()
+        await this.client.close()
+        return data
+      }
+
+      
 
 }

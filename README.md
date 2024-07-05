@@ -55,7 +55,7 @@
 7. **Encontrar peli­culas donde el actor con id 1 haya participado:**
 
    ```bash
-   db.movie.find({"character.id_actor": id})
+   db.movie.find({"character.id_actor": 1})
    ```
    
 8. **Calcular el valor total de todas las copias de DVD disponibles:**
@@ -192,17 +192,13 @@
 16. **Encontrar todas las pelÃ­culas de ciencia ficcion que tengan al actor con id 3:**
 
     ```bash
-    [
-        {
-            $match: {genre: 'Ciencia FicciÃ³n', 'character.id_actor': 3}
-        }
-    ]
+    db.movie.find({genre: "Ciencia Ficción", "character.id_actor": 3})
     ```
 
 17. **Encontrar la peli­cula con mas copias disponibles en formato DVD:**
 
     ```bash
-    [
+    db.movie.aggregate([
       {
         $unwind: '$format'
       },
@@ -219,42 +215,45 @@
       {
         $limit: 1
       }
-    ]
+    ])<>
     ```
 
 18. **Encontrar todos los actores que han ganado premios despues de 2015:**
 
     ```bash
-    [
-      {
-        $match: {
-          	"awards.year": {$gt: 2015}
-        }
-      },
-      {
-        $project: {
-          full_name: 1
-        }
-      }
-    ]
+    db.actor.find({"awards.year": {$gt: year}}).project({full_name: true})
     ```
 
 19. **Calcular el valor total de todas las copias de Blu-ray disponibles:**
 
     ```bash
-    [  
-     {$unwind: '$format'},
-     {$match:{'format.name': 'Bluray'}},
-     {$group: { Â   
-         _id: null, Â   
-         total_valor: {$sum: '$format.value'}}}
-    ]
+    db.movie.aggregate([
+        {
+          $unwind: "$format"
+        },
+        {
+          $match: {
+            "format.name":'Bluray'
+          }
+        },
+        {
+          $set: {
+            total_valor_copias: {$multiply: ["$format.value","$format.copies"]}
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            count: {
+              $sum: "$total_valor_copias"
+            }
+          }
+        }
+      ])
     ```
 
 20. **Encontrar todas las peli­culas en las que el actor con id 2 haya participado:**
 
     ```bash
-    [
-      {$match: {"character.id_actor": 2}}
-    ]
+    db.movie.find({"character.id_actor": 2})
     ```
