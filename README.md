@@ -3,87 +3,78 @@
 1. **Contar el numero total de copias de DVD disponibles en todos los registros:**
 
    ```bash
-   [
+   db.movie.aggregate([
      {$unwind: '$format'},
      {$match: {"format.name": 'dvd'}},
      {$group: {
          _id: null,
          total_copias_dvd: {$sum: "$format.copies"}
       }}
-   ]
+   ])
    ```
 
 2. **Encontrar todos los actores que han ganado premios Oscar:**
 
    ```bash
-   [
-     {$match: {"awards.name": 'Oscar Award'}}
-   ]
+   db.actor.find({ "awards.name": "Oscar Award" }, {full_name: 1})
    ```
 
 3. **Encontrar la cantidad total de premios que ha ganado cada actor:**
 
    ```bash
-   [
-   	{ $addFields: {    awardQuantity: {$size: '$awards'} }}
-   ]
+   db.actor.aggregate([
+            { $addFields: {    awardQuantity: {$size: '$awards'} }}, {$project: {_id: 0,full_name: 1, awardQuantity: 1}}
+    ])
    ```
 
-4. **Obtener todos los actores nacidos despuÃ©s de 1980:**
+4. **Obtener todos los actores nacidos despues de 1980:**
 
    ```bash
-   [
-     {$match: {'date_of_birth': {$gt: '1980-12-31'}}}
-   ]
+   db.actor.find({'date_of_birth': {$gt: '1980-12-31'}})
    ```
 
 5. **Encontrar el actor con mas premios:**
 
    ```bash
-   [
+   db.actor.aggregate([
      {$set:{
          awardsQuantity:{
            $size: '$awards'}}},
      {$sort:{'awardsQuantity': -1}},
      {$project:{full_name: 1,}},
      {$limit: 1}
-   ]
+   ])
    ```
 
 6. **Listar todos los generos de peli­culas distintos:**
 
    ```bash
-   [
-     {$unwind: '$genre'},
-     { $group: {_id: '$genre'}}
-   ]
+   db.movie.distinct('genre')
    ```
 
 7. **Encontrar peli­culas donde el actor con id 1 haya participado:**
 
    ```bash
-   [
-     {$match: {"character.id_actor": 1}}
-   ]
+   db.movie.find({"character.id_actor": id})
    ```
    
 8. **Calcular el valor total de todas las copias de DVD disponibles:**
 
    ```bash
-   [
+   db.movie.aggregate([
      {$unwind: '$format'},
      {$match: 
          {'format.name': 'dvd'}},
      {$group: {
        _id: null,
-       total_valor: {$sum: '$format.value'}}}
-   ]
+       total_valor: {$multiply: ['$format.value', '$format.copies']}}}
+   ])
    ```
 
 9. **Encontrar todas las peli­culas en las que John Doe ha actuado:**
 
    ```bash
-   [
+   db.movie.aggregate([
      {$unwind: '$character'},
      {$lookup: {
          from: 'actor',
@@ -93,22 +84,21 @@
      },
      {$unwind: '$character.id_actor'},
      {$match: {'character.id_actor.full_name': "John Doe"}
-     }
-   ]
+     },
+    {$project: {name: 1}}
+   ])
    ```
 
 10. **Encontrar el numero total de actores en la base de datos:**
 
     ```bash
-    [
-      {$count: 'id_actor'}
-    ]
+    db.actor.countDocuments()
     ```
 
 11. **Encontrar la edad promedio de los actores en la base de datos:**
 
     ```bash
-    [
+    db.actor.aggregate([
      {
         $addFields: {
           age: {
@@ -129,38 +119,31 @@
           avg_age_actors: {$avg: '$age'}
         }
       }
-    ]
+    ])
     ```
 
 12. **Encontrar todos los actores que tienen una cuenta de Instagram:**
 
     ```bash
-    [
+    db.actor.aggregate([
     	{
     	  $match: {
     	    "social_media.instagram": {$exists: true}
     	  }
     	}
-    ]
+    ])
     ```
 
-13. **Encontrar todas las pelÃ­culas en las que participan actores principales:**
+13. **Encontrar todas las pel­culas en las que participan actores principales:**
 
     ```bash
-    [
-        {
-          $match: {
-            "character.rol": 'principal'
-          }
-        }
-    ]
-    
+    db.actor.find({"character.rol": 'principal'})
     ```
 
-14. **Encontrar el numero total de premios que se han otorgado en todas las pelÃ­culas:**
+14. **Encontrar el numero total de premios que se han otorgado en todas las peliculas:**
 
     ```bash
-    [
+    db.movie.aggregate([
       {
         $unwind: "$character",
       },
@@ -186,13 +169,13 @@
       },
     
      
-    ]
+    ])
     ```
 
 15. **Encontrar todas las peli­culas en las que John Doe ha actuado y que estan en formato Blu-ray:**
 
     ```bash
-    [
+    db.movie.aggregate([
       {$unwind: '$character'},
       {$lookup: {
           from: 'actor',
@@ -203,7 +186,7 @@
       {$unwind: '$character.id_actor'},
       {$match: {'character.id_actor.full_name': "John Doe", "format.name": 'Bluray'}
       },
-    ]
+    ])
     ```
 
 16. **Encontrar todas las pelÃ­culas de ciencia ficcion que tengan al actor con id 3:**

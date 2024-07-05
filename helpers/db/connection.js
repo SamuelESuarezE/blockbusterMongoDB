@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb";
 
-export class Connect {
-    static instance;
+export class Connection {
+    static instanceConnection;
     // mongodb://mongo:MvwjZZrDvXeaTaXAaIVhZLYXQkahfinL@monorail.proxy.rlwy.net:44048
 
     #host;
@@ -13,19 +13,19 @@ export class Connect {
 
 
     constructor({host, user, password, dbName, cluster}={host: 'mongodb://', user: 'mongo', password: 'MvwjZZrDvXeaTaXAaIVhZLYXQkahfinL', dbName: "blockbuster",cluster: "monorail.proxy.rlwy.net:44048"}) {
-        if (!Connect.instance) {
+        if (!Connection.instanceConnection) {
             this.setHost = host;
             this.user = user;
             this.setPassword = password;
             this.setDbName = dbName;
             this.setCluster = cluster;
             this.#open();
-            Connect.instance = this;
-            return Connect.instance;
+            Connection.instanceConnection = this;
+            return Connection.instanceConnection;z
 
         }
 
-        return Connect.instance;
+        return Connection.instanceConnection;
         
     }
 
@@ -57,18 +57,13 @@ export class Connect {
         this.#cluster = value;
     }
 
-
-    async reConnect() {
-        await this.client.connect();
-        console.log("Connected successfully")
+    destructor() {
+        Connection.instanceConnection = undefined
     }
     
     async #open() {
         // mongodb+srv://samuelsuarezgm:mWJPXQMW06Gcq4UQ@cluster0.bujivll.mongodb.net/
         let url = `${this.#host}${this.user}:${this.#password}@${this.#cluster}`;
-        console.log("URL: " + url);
         this.client = new MongoClient(url);
-        console.log("Client opened");
-
     }
 }
