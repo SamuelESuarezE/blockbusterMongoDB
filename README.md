@@ -215,7 +215,7 @@
       {
         $limit: 1
       }
-    ])<>
+    ])
     ```
 
 18. **Encontrar todos los actores que han ganado premios despues de 2015:**
